@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+// No title override here: the root layout's default title is the landing
+// page's title, since Next.js title templates apply to child segments only,
+// not to the segment that defines them.
 export const metadata: Metadata = {
-  title: "Home",
   description:
     "Moment turns a set of photos into an AI-matched song, caption, and exportable Reel.",
 };

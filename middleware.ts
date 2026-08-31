@@ -14,14 +14,18 @@ export async function middleware(request: NextRequest) {
   }
 
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+
+  let response: NextResponse;
   if (!token) {
     const signInUrl = new URL("/signin", request.url);
     signInUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(signInUrl);
+    response = NextResponse.redirect(signInUrl);
+  } else {
+    response = NextResponse.next();
   }
 
-  // SEO-01: authenticated app routes must not be indexed.
-  const response = NextResponse.next();
+  // SEO-01: authenticated app routes must not be indexed, whether or not
+  // the request ends up redirected to sign-in.
   response.headers.set("X-Robots-Tag", "noindex, nofollow");
   return response;
 }
