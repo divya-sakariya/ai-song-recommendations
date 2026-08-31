@@ -47,33 +47,55 @@ function formatDuration(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-// SHORTLIST-01/05: live Spotify metadata search, scoped to the India market
-// (PRD targets India-based creators) so `is_playable` reflects a real
-// region-lock check rather than a global availability flag.
-export async function searchSpotifyTrack(query: string): Promise<SpotifyTrackResult | null> {
-  const token = await getAccessToken();
-  if (!token) return null;
+interface SpotifyApiTrack {
+  id: string;
+  name: string;
+  artists?: { name: string }[];
+  external_urls?: { spotify?: string };
+  preview_url?: string | null;
+  duration_ms?: number;
+  is_playable?: boolean;
+}
 
-  const url = new URL("https://api.spotify.com/v1/search");
-  url.searchParams.set("q", query);
-  url.searchParams.set("type", "track");
-  url.searchParams.set("market", "IN");
-  url.searchParams.set("limit", "1");
-
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) return null;
-
-  const data = await res.json();
-  const track = data?.tracks?.items?.[0];
-  if (!track) return null;
-
+function mapTrack(track: SpotifyApiTrack): SpotifyTrackResult {
   return {
     id: track.id,
     title: track.name,
-    artist: (track.artists ?? []).map((a: { name: string }) => a.name).join(", "),
+    artist: (track.artists ?? []).map((a) => a.name).join(", "),
     externalUrl: track.external_urls?.spotify ?? "",
     previewUrl: track.preview_url ?? null,
     durationLabel: formatDuration(track.duration_ms ?? 0),
     playable: track.is_playable !== false,
   };
+}
+
+async function searchTracksRaw(query: string, limit: number): Promise<SpotifyApiTrack[]> {
+  const token = await getAccessToken();
+  if (!token) return [];
+
+  const url = new URL("https://api.spotify.com/v1/search");
+  url.searchParams.set("q", query);
+  url.searchParams.set("type", "track");
+  url.searchParams.set("market", "IN");
+  url.searchParams.set("limit", String(limit));
+
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return [];
+
+  const data = await res.json();
+  return data?.tracks?.items ?? [];
+}
+
+// SHORTLIST-01/05: live Spotify metadata search, scoped to the India market
+// (PRD targets India-based creators) so `is_playable` reflects a real
+// region-lock check rather than a global availability flag.
+export async function searchSpotifyTrack(query: string): Promise<SpotifyTrackResult | null> {
+  const [track] = await searchTracksRaw(query, 1);
+  return track ? mapTrack(track) : null;
+}
+
+// SHORTLIST-04: manual search against the same live Spotify catalog.
+export async function searchSpotifyTracks(query: string, limit = 6): Promise<SpotifyTrackResult[]> {
+  const tracks = await searchTracksRaw(query, limit);
+  return tracks.map(mapTrack);
 }

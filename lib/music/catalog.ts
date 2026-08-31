@@ -31,3 +31,26 @@ const CATALOG: Record<string, SongSuggestion[]> = {
 export function catalogSuggestionsForMood(mood: string): SongSuggestion[] {
   return CATALOG[mood] ?? CATALOG.neutral;
 }
+
+// SHORTLIST-04 demo-mode fallback: substring search across the whole local
+// catalog when Spotify isn't configured, so manual search still works
+// offline instead of always coming back empty.
+export function searchCatalog(query: string): SongSuggestion[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+
+  const seen = new Set<string>();
+  const results: SongSuggestion[] = [];
+  for (const suggestion of Object.values(CATALOG).flat()) {
+    const key = `${suggestion.title}|${suggestion.artist}`;
+    if (seen.has(key)) continue;
+    if (
+      suggestion.title.toLowerCase().includes(q) ||
+      suggestion.artist.toLowerCase().includes(q)
+    ) {
+      seen.add(key);
+      results.push(suggestion);
+    }
+  }
+  return results;
+}
