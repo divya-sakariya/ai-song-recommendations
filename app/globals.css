@@ -21,6 +21,12 @@
 }
 
 @layer components {
+  /* Monospace reserved for technical/status readouts only (Design_Spec.md
+     Direction B), never decorative body text. */
+  .mono {
+    font-family: "SFMono-Regular", Consolas, "Courier New", monospace;
+  }
+
   .skip-link {
     @apply absolute z-50 -translate-y-20 bg-amber text-bg px-4 py-2.5 rounded;
     left: 8px;
