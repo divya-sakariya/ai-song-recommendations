@@ -37,3 +37,20 @@ live Spotify/YouTube search.
 - `npm run build` — production build
 - `npm run lint` — ESLint (Next.js config)
 - `npm run typecheck` — TypeScript, no emit
+- `npm test` — Jest unit + component + API integration tests
+- `npm run test:e2e` — Playwright E2E, accessibility (axe-core), and
+  keyboard-navigation specs; builds and boots the app itself, no running
+  dev server needed first
+
+### Testing notes
+
+- API integration tests mock the DB layer (no MongoDB needed to run them).
+- E2E tests bypass the login screen with a real, correctly-signed NextAuth
+  session JWT rather than a live sign-up/sign-in, since the create flow
+  itself needs no DB in demo mode — see `e2e/fixtures.ts` for why.
+  Registration/login are covered separately by component tests that mock
+  `next-auth/react`.
+- `mongodb-memory-server` is an installed devDependency for a real-DB test
+  setup in environments that can reach `fastdl.mongodb.org` (this doesn't
+  work in every sandbox/CI network policy) — not currently wired into any
+  test.
