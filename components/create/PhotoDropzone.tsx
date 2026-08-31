@@ -102,6 +102,9 @@ export function PhotoDropzone({ onPhotosChange }: PhotoDropzoneProps) {
         <Button type="button" onClick={() => inputRef.current?.click()}>
           Choose photos
         </Button>
+        <label htmlFor="photo-input" className="sr-only">
+          Choose photos
+        </label>
         <input
           ref={inputRef}
           type="file"

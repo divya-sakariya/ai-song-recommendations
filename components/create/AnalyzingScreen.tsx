@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import type { UploadedPhoto } from "@/lib/upload/types";
 import type { ResolvedSong } from "@/lib/music/types";
@@ -22,6 +22,14 @@ export function AnalyzingScreen({ photos, onSuccess, onGiveUp }: AnalyzingScreen
   const [status, setStatus] = useState<"analyzing" | "slow" | "error">("analyzing");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // Moves focus to this screen's heading on mount, and again whenever the
+  // heading itself changes (entering the error state) — see the identical
+  // comment in UploadScreen.tsx for why.
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, [status === "error"]);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,7 +74,7 @@ export function AnalyzingScreen({ photos, onSuccess, onGiveUp }: AnalyzingScreen
     const canRetry = attempt < MAX_RETRIES;
     return (
       <section aria-labelledby="h1-analysis-error">
-        <h1 id="h1-analysis-error" className="text-h1 mb-3">
+        <h1 ref={headingRef} tabIndex={-1} id="h1-analysis-error" className="text-h1 mb-3">
           Analysis failed
         </h1>
         <p role="alert" className="text-body text-red-400 mb-6 flex items-center gap-1.5">
@@ -93,7 +101,7 @@ export function AnalyzingScreen({ photos, onSuccess, onGiveUp }: AnalyzingScreen
           ? "STILL ANALYZING… THIS IS TAKING LONGER THAN USUAL"
           : "ANALYZING…"}
       </p>
-      <h1 id="h1-analyzing" className="text-h1 mb-1.5">
+      <h1 ref={headingRef} tabIndex={-1} id="h1-analyzing" className="text-h1 mb-1.5">
         Reading the room
       </h1>
       <p className="text-text-soft text-body max-w-[60ch]">

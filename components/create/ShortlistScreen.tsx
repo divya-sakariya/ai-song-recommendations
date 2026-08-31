@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SongCard } from "./SongCard";
 import { SongSearch } from "./SongSearch";
 import { Button } from "@/components/ui/Button";
@@ -18,6 +18,13 @@ export function ShortlistScreen({ mood, songs: initialSongs }: ShortlistScreenPr
   const [songs, setSongs] = useState<ResolvedSong[]>(initialSongs);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // See the identical comment in UploadScreen.tsx: moves focus here when
+  // CreateFlow mounts this screen, instead of leaving it at <body>.
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, []);
 
   function handleSearchSelect(song: ResolvedSong) {
     setSongs((prev) => (prev.some((s) => s.id === song.id) ? prev : [...prev, song]));
@@ -26,7 +33,7 @@ export function ShortlistScreen({ mood, songs: initialSongs }: ShortlistScreenPr
 
   return (
     <section aria-labelledby="h1-shortlist">
-      <h1 id="h1-shortlist" className="text-h1 mb-1.5">
+      <h1 ref={headingRef} tabIndex={-1} id="h1-shortlist" className="text-h1 mb-1.5">
         Matches
       </h1>
       <p className="text-text-soft text-body mb-8 max-w-[60ch]">
