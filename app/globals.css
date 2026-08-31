@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-bg text-text;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* Every interactive element gets a visible focus ring — never outline:none
+     without a replacement (Design_Spec.md #3 accessibility rules). */
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid var(--focus-ring, #edE8DF);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply absolute z-50 -translate-y-20 bg-amber text-bg px-4 py-2.5 rounded;
+    left: 8px;
+    top: -100px;
+  }
+  .skip-link:focus {
+    top: 8px;
+    transform: none;
+  }
+}
